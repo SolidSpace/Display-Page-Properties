@@ -33,7 +33,6 @@ folder name | Author details (name, company, twitter alias with link)
 
 Version|Date|Comments
 -------|----|--------
-1.1|March 10, 2021|Update comment
 1.0|March 19, 2021|Initial release
 
 ## Disclaimer
