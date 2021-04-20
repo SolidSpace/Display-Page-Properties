@@ -10,7 +10,7 @@ import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import * as strings from 'DisplayPagePropertyWebPartStrings';
 import { setup as pnpSetup } from "@pnp/common";
 import { sp } from "@pnp/sp/presets/all";
-import { ThemeProvider, ThemeChangedEventArgs, IReadonlyTheme } from '@microsoft/sp-component-base';
+import {ThemeProvider,ThemeChangedEventArgs,IReadonlyTheme,ISemanticColors} from '@microsoft/sp-component-base';
 //import { PropertyPaneTextDialogWindow } from '../controls/PropertyPaneTextDialog/PropertyPaneTextDialogWindow';
 import { PagePropertyService } from '../common/services/PagePropertyService';
 import { PagePropertyConstants } from "../common/constants/PagePropertyConstants";
@@ -35,18 +35,16 @@ export default class DisplayPagePropertyWebPart extends BaseClientSideWebPart<ID
   private _lastProcessedTemplate: string;
 
   protected onInit(): Promise<void> {
+  // Consume the new ThemeProvider service
+  this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
 
-    // Consume the new ThemeProvider service
-    this._themeProvider = this.context.serviceScope.consume(ThemeProvider.serviceKey);
+  // If it exists, get the theme variant
+  this._themeVariant = this._themeProvider.tryGetTheme();
 
-    // If it exists, get the theme variant
-    this._themeVariant = this._themeProvider.tryGetTheme();
+  // Register a handler to be notified if the theme variant changes
+  this._themeProvider.themeChangedEvent.add(this, this._handleThemeChangedEvent);
 
-    // Register a handler to be notified if the theme variant changes
-    this._themeProvider.themeChangedEvent.add(this, this._handleThemeChangedEvent);
 
-    // Register a handler to be notified if the theme variant changes
-    this._themeProvider.themeChangedEvent.add(this, this._handleThemeChangedEvent);
     this._defaultPageProperties = ["Title", "ID"];
     this.properties.selectedPageProperties = (this.properties.selectedPageProperties)?this.properties.selectedPageProperties:this._defaultPageProperties;
     this.properties.hasDefaultTemplateBeenUpdated = (this.properties.hasDefaultTemplateBeenUpdated)?this.properties.hasDefaultTemplateBeenUpdated:false;
@@ -171,15 +169,6 @@ export default class DisplayPagePropertyWebPart extends BaseClientSideWebPart<ID
   }
 
   protected getPropertyPaneConfiguration(): IPropertyPaneConfiguration {
-    // Creates a custom PropertyPaneTextDialog for the templateText property
-/*
-    this.ppTemplateTextDialog = new PropertyPaneTextDialogWindow(PagePropertyConstants.propertyTemplateText, {
-      dialogTextFieldValue: this.properties.templateContent,
-      onPropertyChange: this.onCustomPropertyPaneChange.bind(this),
-      disabled: false,
-      strings: strings.TemplateTextStrings
-    });
-*/
     return {
       pages: [
         {
@@ -246,7 +235,6 @@ export default class DisplayPagePropertyWebPart extends BaseClientSideWebPart<ID
                   }
 
                 })
-                //this.ppTemplateTextDialog
               ]
             },
 
