@@ -117,7 +117,10 @@ export class DisplayPageProperties extends React.Component<IDisplayPagePropertie
         <Spinner label={this.props.strings.loading} ariaLive="assertive" labelPosition="right" />
       }
       return (
-        <div dangerouslySetInnerHTML={(this.state.isError)?this.createMarkup(this.state.error):this.createMarkup(this.state.processedTemplateResult)}></div>
+        <div style={{backgroundColor: semanticColors.bodyBackground, color: semanticColors.bodyText}}>
+          <div dangerouslySetInnerHTML={(this.state.isError)?this.createMarkup(this.state.error):this.createMarkup(this.state.processedTemplateResult)}></div>
+        </div>
+
       );
     }
   }

@@ -29,6 +29,8 @@
   }
   .dynamic-item-field{
     display: flex;
+    flex-direction: column;
+    margin: 0px 0px 5px 0px;
   }
   .dynamic-item-label{
     font-weight:800;
@@ -45,10 +47,8 @@
       {{#each items}}
           <div class="dynamic-item">
               <div class="dynamic-item-fields">
-                <div  class="dynamic-item-field">
-                  <div><span class= 'ms-DetailsRow-cell dynamic-item-label'>Title:</span></div>
-                  <div><span class= 'ms-DetailsRow-cell dynamic-item-value'> <strong>{{Title.textValue}} </strong></span></div>
-                </div>
+                     <div  class='dynamic-item-field'><div><span class= 'ms-DetailsRow-cell dynamic-item-label'>Title</span></div><div><span class= 'ms-DetailsRow-cell dynamic-item-value'> <strong>{{Title.textValue}} </strong></span></div></div>
+<div  class='dynamic-item-field'><div><span class= 'ms-DetailsRow-cell dynamic-item-label'>ID</span></div><div><span class= 'ms-DetailsRow-cell dynamic-item-value'> <strong>{{ID.textValue}} </strong></span></div></div>
               </div>
           </div>
       {{/each}}

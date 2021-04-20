@@ -1,17 +1,7 @@
-/*
 'use strict';
 
-const build = require('@microsoft/sp-build-web');
-
-build.addSuppression(`Warning - [sass] The local CSS class 'ms-Grid' is not camelCase and will not be type-safe.`);
-
-build.initialize(require('gulp'));
-*/
-'use strict';
-
-// check if gulp dist was called
+// if dist option is used add --ship param
 if (process.argv.indexOf('dist') !== -1) {
-  // add ship options to command call
   process.argv.push('--ship');
 }
 
@@ -20,9 +10,8 @@ const build = require('@microsoft/sp-build-web');
 const gulpSequence = require('gulp-sequence');
 build.addSuppression(`Warning - [sass] The local CSS class 'ms-Grid' is not camelCase and will not be type-safe.`);
 
-// Create clean distrubution package
+
 gulp.task('dist', gulpSequence('clean', 'bundle', 'package-solution'));
-// Create clean development package
 gulp.task('dev', gulpSequence('clean', 'bundle', 'package-solution'));
 
 /********************************************************************************************
@@ -35,6 +24,9 @@ build.configureWebpack.mergeConfig({
   additionalConfiguration: (generatedConfiguration) => {
 
     generatedConfiguration.resolve.alias = { handlebars: 'handlebars/dist/handlebars.min.js' };
+/*
+* Disable this section if breakpoints for debug will not be called
+*/
 /*
     generatedConfiguration.module.rules.push(
       { test: /\.js$/, loader: 'unlazy-loader' }
