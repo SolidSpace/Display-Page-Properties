@@ -6,7 +6,7 @@ SPFX Webpart Project for SharePoint online.
 Use this Webpart to display Page Properties inside your Site Page and style them by using Handlebars Template. 
 This Webpart is build for SharePoint Online with spfx version 1.11.
 
-![Webpart](assets/display-page-properties-webpart.gif)
+![Web Part Preview](https://raw.githubusercontent.com/SolidSpace/Display-Page-Properties/main/assets/display-page-properties-webpart.GIF)
 
 ## Used SharePoint Framework Version
 
