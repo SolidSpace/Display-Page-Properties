@@ -3,10 +3,10 @@
 ## Summary
 
 SPFX Webpart Project for SharePoint online. 
-Use this Webpart to display Page Properties inside of your Site Page and style them by using Handlebars Template. 
-Still working on this release - Please wait before using this
+Use this Webpart to display Page Properties inside your Site Page and style them by using Handlebars Template. 
+This Webpart is build for SharePoint Online with spfx version 1.11.
 
-[picture of the solution in action, if possible]
+![Webpart](assets/display-page-properties-webpart.gif)
 
 ## Used SharePoint Framework Version
 
@@ -48,11 +48,33 @@ Version|Date|Comments
 - in the command-line run:
   - **npm install**
   - **gulp serve**
+- For debug purpose, disable following section in gulp conf, to ensure that breakpoint will work correctly.
+- 
+- ```gulp
+  generatedConfiguration.module.rules.push(
+        { test: /\.js$/, loader: 'unlazy-loader' }
+      );
+```
 
-> Include any additional steps as needed.
+## Building the code
+
+Download & install all dependencies, build, bundle & package the project
+
+```shell
+# download & install dependencies
+npm install
+
+# transpile all TypeScript & SCSS => JavaScript & CSS
+gulp build
+
+# create component bundle & manifest
+gulp bundle
+
+# create SharePoint package
+gulp package-solution
 
 ## Credits 
-Adopted code from the SPFX Project Content Query Online that helped me to understand how to get 
+Adopted code from the SPFX Project "Content Query Online" that helped me to understand, how to get 
 Handlebars in SPFX up and running and fix loading issues with handlebar-helpers. 
 Thanks a lot to the people who build the content query webpart. 
 https://github.com/pnp/sp-dev-fx-webparts/tree/master/samples/react-content-query-online
@@ -71,8 +93,7 @@ To display items and their field values, you have to iterate through the {{items
     <div class="item"></div>
 {{/each}}
 ```
-Before customizing your template. Select your desired fields from the "Selected Page properties" box. While adding the webpart to the 
-page it shows up with the default properties title and id.  
+Before customizing your template. Select your desired fields from the "Selected Page properties" box. 
 
 ##### Handlebars
 
@@ -83,13 +104,14 @@ page it shows up with the default properties title and id.
     </div>
 {{/each}}
 ```
-We are almost there, the above code is rendering an `[object]` because the Content Query web part offers 3 different ways to render a field value:
+
+The above code will render an `[object]`. To access the field value, the following method are available.
 
 Property | Description
 ---------|---------------
 `{{MyField.textValue}}` | Renders the text value of the field, a more readable end-user value to use for display.
 `{{MyField.htmlValue}}` | Renders the HTML value of the field. For example, a *Link* field HTML value would render something like `<a href="...">My Link Field</a>`
-`{{MyField.rawValue}}`  | Returns the raw value of the field. For example, a *Taxonomy* field raw value would return an object which contains the term `wssId` and its label
+`{{MyField.rawValue}}`  | Returns the raw value of the field. For example, a *Taxonomy* field raw value would return an object which contains the term `wssId` ,its label and a term property with the correct term. Please note, that a multivalue term field will return an array ob term objects. Use #each block helper to render
 `{{MyField.jsonValue}}`  | Returns a JSON object value of the field. For example, an *Image* field JSON value would return a JSON object which contains the `serverRelativeUrl` property
 `{{MyField.personValue}}`  | Returns an object value of a person field. The `personValue` property provides `email`, `displayName` and `image` properties. The `image` property contains `small`, `medium`, and `large` properties, each of which pointing to the profile image URL for the small, medium, and large profile images.
 
