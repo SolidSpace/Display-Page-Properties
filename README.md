@@ -59,18 +59,25 @@ Version|Date|Comments
 
 Download & install all dependencies, build, bundle & package the project
 
-```shell
 # download & install dependencies
+```shell
 npm install
+```
 
 # transpile all TypeScript & SCSS => JavaScript & CSS
+```shell
 gulp build
+```
 
 # create component bundle & manifest
+```shell
 gulp bundle
+```
 
 # create SharePoint package
+```shell
 gulp package-solution
+```
 
 ## Credits 
 Adopted code from the SPFX Project "Content Query Online" that helped me to understand, how to get 
