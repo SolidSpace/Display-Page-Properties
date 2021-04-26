@@ -14,7 +14,7 @@ This Webpart is build for SharePoint Online with spfx version 1.11.
 ![Node.js LTS 10.x](https://img.shields.io/badge/Node.js-LTS%2010.x-green.svg)
 ![SharePoint Online](https://img.shields.io/badge/SharePoint-Online-red.svg)
 ![Teams N/A](https://img.shields.io/badge/Teams-N%2FA-lightgrey.svg)
-![Workbench Hosted](https://img.shields.io/badge/Workbench-Hosted-yellow.svg)on-1.11-green.svg)
+![Workbench Hosted](https://img.shields.io/badge/Workbench-Hosted-yellow.svg)
 
 ## Applies to
 
@@ -27,7 +27,7 @@ This Webpart is build for SharePoint Online with spfx version 1.11.
 
 Solution|Author(s)
 --------|---------
-folder name | Author details (name, company, twitter alias with link)
+displayPageProperty| Marc Jonas
 
 ## Version history
 
@@ -48,9 +48,8 @@ Version|Date|Comments
 - in the command-line run:
   - **npm install**
   - **gulp serve**
-- For debug purpose, disable following section in gulp conf, to ensure that breakpoint will work correctly.
-- 
-- ```gulp
+- For debug purpose, disable following section in gulp conf, to ensure that breakpoint will work correctly. 
+ ```gulp
   generatedConfiguration.module.rules.push(
         { test: /\.js$/, loader: 'unlazy-loader' }
       );
