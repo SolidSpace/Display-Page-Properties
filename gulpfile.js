@@ -27,11 +27,11 @@ build.configureWebpack.mergeConfig({
 /*
 * Disable this section if breakpoints for debug will not be called
 */
-/*
+
     generatedConfiguration.module.rules.push(
       { test: /\.js$/, loader: 'unlazy-loader' }
     );
-*/
+
     generatedConfiguration.node = {
       fs: 'empty'
     }
