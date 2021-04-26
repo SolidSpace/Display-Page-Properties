@@ -170,9 +170,6 @@ export class PagePropertyService {
   public async getExpandedPagePropertyValues(context: WebPartContext, propertyNames: string[]): Promise<IPagePropertyData> {
     let expandHelpers: string[] = ["FieldValuesAsText", "FieldValuesAsHtml"];
     let expandAll: string[] = expandHelpers.concat(propertyNames);
-    //working!
-    //  const items = await sp.web.lists.getByTitle("Site Pages").items.getById(1).select("Title","ID","MMeta","TaxCatchAll/ID","TaxCatchAll/Term").expand("TaxCatchAll").get();
-    //sp.web.lists.getByTitle("Site Pages").items.getById(1).select("MMeta/ID", "MMeta/Term").expand("MMeta").get().then((items) => {
     //Make failsafe for Workbench
     let id = (context.pageContext.listItem && context.pageContext.listItem.id) ? context.pageContext.listItem.id : 1;
     return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
@@ -187,8 +184,9 @@ export class PagePropertyService {
         result.taxCatchAllResult = termdata;
         return Promise.resolve(result);
       }).catch(error => {
-        console.error("Error fetching Termdata:", error);
-        return Promise.reject(error);
+        console.info("No Termdata TaxCatchall to fetch:", error);
+        result.taxCatchAllResult = null;
+        return Promise.resolve(result);
       });
     }).catch(error => {
       console.error("Error fetching Propertydata:", error);

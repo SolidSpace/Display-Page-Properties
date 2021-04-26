@@ -3,7 +3,7 @@
   "solution": {
     "name": "Page Property Display on Page",
     "id": "3d0be923-55a8-4340-9d6f-16a579d4dced",
-    "version": "1.0.1.0",
+    "version": "1.0.1.1",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,

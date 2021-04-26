@@ -16,7 +16,7 @@
   "supportsThemeVariants": true,
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70", // Other
-    "group": { "default": "Other" },
+    "group": { "default": "Text, media, and content" },
     "title": { "default": "Display Page Property" },
     "description": { "default": "Display Page Properties on your Site Page" },
     "officeFabricIconFontName": "Page",
