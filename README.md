@@ -59,22 +59,22 @@ Version|Date|Comments
 
 Download & install all dependencies, build, bundle & package the project
 
-# download & install dependencies
+## download & install dependencies
 ```shell
 npm install
 ```
 
-# transpile all TypeScript & SCSS => JavaScript & CSS
+## transpile all TypeScript & SCSS => JavaScript & CSS
 ```shell
 gulp build
 ```
 
-# create component bundle & manifest
+## create component bundle & manifest
 ```shell
 gulp bundle
 ```
 
-# create SharePoint package
+## create SharePoint package
 ```shell
 gulp package-solution
 ```
