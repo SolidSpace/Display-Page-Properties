@@ -7,6 +7,7 @@ import { IPersonValue } from "../dataContracts/IPersonValue";
 import * as CamlBuilder from "camljs";
 import { calculatePrecision } from "office-ui-fabric-react";
 import { IPagePropertyData } from "./IPagePropertyData";
+import { odataUrlFrom } from "@pnp/sp/odata";
 
 export class PagePropertyService {
   private sp: SPRest
@@ -138,7 +139,7 @@ export class PagePropertyService {
       for (var key in listItem) {
         //is field recognized as taxonomy field
         if (results.taxonomyPropertyNames.indexOf(key) > -1) {
-          let term =taxData[listItem[key].WssId];
+          let term = taxData[listItem[key].WssId];
           let newTerm = { ...listItem[key], "Term": term };
           listItem[key] = newTerm;
         }
@@ -155,7 +156,8 @@ export class PagePropertyService {
   public async getPageProperties(context: WebPartContext, skipSystemFields?: boolean): Promise<any> {
     //Make failsafe for Workbench
     let id = (context.pageContext.listItem && context.pageContext.listItem.id) ? context.pageContext.listItem.id : 1;
-    const item: any = await sp.web.lists.getByTitle("Site Pages").items.getById(id).expand("FieldValuesAsText", "FieldValuesAsHtml").get();
+
+    const item: any = await sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).expand("FieldValuesAsText", "FieldValuesAsHtml").get();
 
     let result = {};
     for (var key in item) {
@@ -172,7 +174,8 @@ export class PagePropertyService {
     let expandAll: string[] = expandHelpers.concat(propertyNames);
     //Make failsafe for Workbench
     let id = (context.pageContext.listItem && context.pageContext.listItem.id) ? context.pageContext.listItem.id : 1;
-    return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
+    //return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
+    return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
       var result: IPagePropertyData = { dataItems: (items.length) ? items : [items], taxonomyPropertyNames: [], taxCatchAllResult: null };
       for (var key in items) {
         if (items[key] != null && items[key].WssId != null) {
@@ -180,7 +183,8 @@ export class PagePropertyService {
         }
       }
       let itemlist = result.taxonomyPropertyNames.concat(["TaxCatchAll/ID", "TaxCatchAll/Term"]);
-      return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(itemlist.join(",")).expand("TaxCatchAll").get().then((termdata) => {
+      //return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(itemlist.join(",")).expand("TaxCatchAll").get().then((termdata) => {
+      return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(itemlist.join(",")).expand("TaxCatchAll").get().then((termdata) => {
         result.taxCatchAllResult = termdata;
         return Promise.resolve(result);
       }).catch(error => {
@@ -208,7 +212,7 @@ export class PagePropertyService {
     const query: ICamlQuery = {
       ViewXml: caml
     }
-    return sp.web.lists.getByTitle("Site Pages").getItemsByCAMLQuery(query, "FieldValuesAsText", "FieldValuesAsHtml").then((result) => {
+    return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).getItemsByCAMLQuery(query, "FieldValuesAsText", "FieldValuesAsHtml").then((result) => {
       return Promise.resolve(result);
     }).catch((error) => {
       console.error(error);
@@ -272,5 +276,8 @@ export class PagePropertyService {
   }
 
 
+
+
 }
+
 
