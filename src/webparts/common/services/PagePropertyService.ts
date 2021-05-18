@@ -8,6 +8,9 @@ import * as CamlBuilder from "camljs";
 import { calculatePrecision } from "office-ui-fabric-react";
 import { IPagePropertyData } from "./IPagePropertyData";
 import { odataUrlFrom } from "@pnp/sp/odata";
+import { ColumnHelper } from "../util/ColumnHelper";
+import { ISelectableLookup } from "../dataContracts/ISelectableLookup";
+import { resultItem } from "office-ui-fabric-react/lib/components/FloatingPicker/PeoplePicker/PeoplePicker.scss";
 
 export class PagePropertyService {
   private sp: SPRest
@@ -26,7 +29,7 @@ export class PagePropertyService {
    **************************************************************************************************/
   public static getNormalizedQueryResults(results: IPagePropertyData, viewFields: string[]): INormalizedResult[] {
     //Map Taxonomy Terms to Taxonomy Fields
-    (results.taxonomyPropertyNames.length > 0) ? PagePropertyService.extractTaxonomyValues(results) : "";
+    (results.taxonomyPropertyNames.length > 0) ? ColumnHelper.extractTaxonomyValues(results) : "";
 
     const normalizedResults: INormalizedResult[] = results.dataItems.map((result) => {
       let normalizedResult: any = {};
@@ -47,105 +50,27 @@ export class PagePropertyService {
           textValue: (isTerm) ? result[viewField].Term : result.FieldValuesAsText[formattedName],
           htmlValue: (isTerm) ? result[viewField].Term : htmlValue,
           rawValue: result[viewField] || result[viewField + 'Id'],
-          jsonValue: this.jsonParseField(result[viewField] || result[viewField + 'Id']),
-          personValue: this.extractPersonInfo(htmlValue)
+          jsonValue: ColumnHelper.jsonParseField(result[viewField] || result[viewField + 'Id']),
+          personValue: ColumnHelper.extractPersonInfo(htmlValue)
         }
       }
 
       return normalizedResult;
     });
 
-    return normalizedResults;
-  }
-
-
-
-  /**************************************************************************************************
-  * Returns a JSON object
-  * @param value : A string representation of a JSON object
-  **************************************************************************************************/
-  private static jsonParseField(value: any): any {
-    if (typeof value === 'string') {
-      try {
-        let jsonObject = JSON.parse(value);
-        return jsonObject;
-      }
-      catch {
-        return value;
-      }
-    }
-    return value;
-  }
-
-  /**
-    * Returns user profile information based on a user field
-    * @param htmlValue : A string representation of the HTML field rendering
-    * This function does a very rudimentary extraction of user information based on very limited
-    * HTML parsing. We need to update this in the future to make it more sturdy.
-    */
-  private static extractPersonInfo(htmlValue: string): IPersonValue {
-
-    try {
-      const sipIndex = htmlValue.indexOf(`sip='`);
-      if (sipIndex === -1) {
-        return null;
-      }
-      // Try to extract the user email and name
-
-      // Get the email address -- we should use RegExp for this, but I suck at RegExp
-      const sipValue = htmlValue.substring(sipIndex + 5, htmlValue.indexOf(`'`, sipIndex + 5));
-      const anchorEnd: number = htmlValue.lastIndexOf('</a>');
-      const anchorStart: number = htmlValue.substring(0, anchorEnd).lastIndexOf('>');
-      const name: string = htmlValue.substring(anchorStart + 1, anchorEnd);
-
-      // Generate picture URLs
-      const smallPictureUrl: string = `/_layouts/15/userphoto.aspx?size=S&username=${sipValue}`;
-      const medPictureUrl: string = `/_layouts/15/userphoto.aspx?size=M&username=${sipValue}`;
-      const largePictureUrl: string = `/_layouts/15/userphoto.aspx?size=L&username=${sipValue}`;
-
-
-      let result: IPersonValue = {
-        email: sipValue,
-        displayName: name,
-        picture: {
-          small: smallPictureUrl,
-          medium: medPictureUrl,
-          large: largePictureUrl
-        }
+    for (let key in results.lookupResult) {
+      let normalizedLookupResult =  {
+        textValue: (typeof results.lookupResult[key]=='object')?results.lookupResult[key].join(","):results.lookupResult[key],
+        htmlValue: (typeof results.lookupResult[key]=='object')?results.lookupResult[key].join(","):results.lookupResult[key],
+        rawValue: (typeof results.lookupResult[key]=='object')?results.lookupResult[key].join(","):results.lookupResult[key],
+        jsonValue: ColumnHelper.jsonParseField(results.lookupResult[key]),
+        personValue: null
       };
-      return result;
 
-    } catch (error) {
-
-      return null;
+      (normalizedResults.length==1)?normalizedResults[0][key]=normalizedLookupResult:normalizedResults.push(normalizedLookupResult);
     }
-  }
-  /**************************************************************************************************
-  * Default return value for getListItems does not contain the Term for Taxonmy Fields.
-  * This function maps the Terms to the Taxonmy Fields.
-  * @param results : Queried ListItem Data from getExpandedPagePropertyValues
-  **************************************************************************************************/
-  private static extractTaxonomyValues(results: IPagePropertyData): IPagePropertyData {
-    let taxData = {};
 
-    //Build Term ID Object for easier access
-    results.taxCatchAllResult.TaxCatchAll.forEach(taxItem => {
-      let id = taxItem.ID;
-      taxData = { ...taxData, [id]: taxItem.Term };
-    });
-
-    //cycle each returned listitem object
-    results.dataItems.forEach((listItem) => {
-      for (var key in listItem) {
-        //is field recognized as taxonomy field
-        if (results.taxonomyPropertyNames.indexOf(key) > -1) {
-          let term = taxData[listItem[key].WssId];
-          let newTerm = { ...listItem[key], "Term": term };
-          listItem[key] = newTerm;
-        }
-      }
-    });
-    return results;
+     return normalizedResults;
   }
 
   /**
@@ -169,29 +94,65 @@ export class PagePropertyService {
     return PagePropertyService._getValidProperties(result, skipSystemFields);
   }
 
-  public async getExpandedPagePropertyValues(context: WebPartContext, propertyNames: string[]): Promise<IPagePropertyData> {
+  /**
+  * Returns the Page Properties from current Page
+  * @param context : The Webpartcontext to query for correct list and page
+  * @param selectableLookup : Fields to query from SharePoint List. Contains expand information. Lookup Columns must be
+  *                           expanded to retrieve values
+  */
+  public async getLookupPropertyValues(context: WebPartContext, selectableLookup: ISelectableLookup): Promise<any> {
+    let id = (context.pageContext.listItem && context.pageContext.listItem.id) ? context.pageContext.listItem.id : 1;
+    let result = {};
+    if (selectableLookup.select.length == 0) { return Promise.resolve(null) };
+    return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(...selectableLookup.select).expand(...selectableLookup.expand).get().then((items) => {
+
+      selectableLookup.expand.forEach((element, index) => {
+        if (items[element].length && items[element].length > 0) {
+          let tmp = [];
+          items[element].forEach(multivalueItem => {
+            tmp.push(multivalueItem[selectableLookup.foreignColumns[index]])
+          });
+          result[element] = tmp;
+        } else {
+          result[element] = items[element][selectableLookup.foreignColumns[index]];
+        }
+
+      });
+      return Promise.resolve(result);
+    }).catch(error => {
+      console.error(error);
+      return Promise.resolve(null);
+    });
+  }
+
+  public async getExpandedPagePropertyValues(context: WebPartContext, propertyNames: string[], selectableLookup: ISelectableLookup): Promise<IPagePropertyData> {
     let expandHelpers: string[] = ["FieldValuesAsText", "FieldValuesAsHtml"];
-    let expandAll: string[] = expandHelpers.concat(propertyNames);
     //Make failsafe for Workbench
     let id = (context.pageContext.listItem && context.pageContext.listItem.id) ? context.pageContext.listItem.id : 1;
     //return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
-    return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
-      var result: IPagePropertyData = { dataItems: (items.length) ? items : [items], taxonomyPropertyNames: [], taxCatchAllResult: null };
+    //    return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(propertyNames.join(",")).expand("FieldValuesAsText", "FieldValuesAsHtml").get().then((items) => {
+    return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(...propertyNames).expand(...expandHelpers).get().then((items) => {
+      var result: IPagePropertyData = { dataItems: (items.length) ? items : [items], taxonomyPropertyNames: [], taxCatchAllResult: null, lookupResult: [] };
       for (var key in items) {
         if (items[key] != null && items[key].WssId != null) {
           result.taxonomyPropertyNames.push(key);
         }
       }
-      let itemlist = result.taxonomyPropertyNames.concat(["TaxCatchAll/ID", "TaxCatchAll/Term"]);
+
+      return this.getLookupPropertyValues(context, selectableLookup).then((lookupItems) => {
+        result.lookupResult = lookupItems;
+        let itemlist = result.taxonomyPropertyNames.concat(["TaxCatchAll/ID", "TaxCatchAll/Term"]);
+        return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(...itemlist).expand("TaxCatchAll").get().then((termdata) => {
+          result.taxCatchAllResult = termdata;
+          return Promise.resolve(result);
+
+        }).catch(error => {
+          console.info("No Termdata TaxCatchall to fetch:", error);
+          result.taxCatchAllResult = null;
+          return Promise.resolve(result);
+        })
+      })
       //return sp.web.lists.getByTitle("Site Pages").items.getById(id).select(itemlist.join(",")).expand("TaxCatchAll").get().then((termdata) => {
-      return sp.web.getList(`${context.pageContext.web.serverRelativeUrl}/SitePages`).items.getById(id).select(itemlist.join(",")).expand("TaxCatchAll").get().then((termdata) => {
-        result.taxCatchAllResult = termdata;
-        return Promise.resolve(result);
-      }).catch(error => {
-        console.info("No Termdata TaxCatchall to fetch:", error);
-        result.taxCatchAllResult = null;
-        return Promise.resolve(result);
-      });
     }).catch(error => {
       console.error("Error fetching Propertydata:", error);
       return Promise.reject(error);
@@ -274,10 +235,6 @@ export class PagePropertyService {
     return pageProperties;
 
   }
-
-
-
-
 }
 
 

@@ -21,6 +21,7 @@ import { PropertyFieldMultiSelect } from '@pnp/spfx-property-controls/lib/Proper
 import { DisplayPageProperties } from './components/DisplayPageProperties';
 import { IDisplayPagePropertiesProps } from './components/IDisplayPagePropertiesProps';
 import { PropertyFieldCodeEditor, PropertyFieldCodeEditorLanguages } from '@pnp/spfx-property-controls/lib/PropertyFieldCodeEditor';
+import { PropertyFieldCollectionData, CustomCollectionFieldType } from '@pnp/spfx-property-controls/lib/PropertyFieldCollectionData';
 
 
 
@@ -103,7 +104,8 @@ export default class DisplayPagePropertyWebPart extends BaseClientSideWebPart<ID
         context: this.context,
         skipSystemFields: false,
         themeVariant: this._themeVariant,
-        selectedProperties: (this.properties.selectedPageProperties) ? this.properties.selectedPageProperties : this._defaultPageProperties
+        selectedProperties: (this.properties.selectedPageProperties) ? this.properties.selectedPageProperties : this._defaultPageProperties,
+        selectedLookupProperties: this.properties.selectedLookupProperties
       }
 
     );
@@ -185,6 +187,37 @@ export default class DisplayPagePropertyWebPart extends BaseClientSideWebPart<ID
                   options: this.selectabelPageProperties,
                   selectedKeys: this.properties.selectedPageProperties,
                 }),
+                PropertyFieldCollectionData("selectedLookupProperties", {
+                  key: "selectedLookupProperties",
+                  label: strings.LoopColumnLabel,
+                  panelHeader: strings.LookupColumnPanelHeader,
+                  manageBtnLabel: strings.LookupColumnManageButton,
+                  value: this.properties.selectedLookupProperties,
+                  cancelBtnLabel:strings.LookupColumnCancelButton,
+                  saveAndAddBtnLabel:strings.LookupColumnSaveCancelButton,
+                  saveBtnLabel:strings.LookupColumnSaveButton,
+                  panelDescription:strings.LookupColumnPanelDescription,
+                  fields: [
+                    {
+                      id: "lookupColumn",
+                      title: strings.LookupColumnLCTitle,
+                      type: CustomCollectionFieldType.string,
+                      required: true
+                    },
+                    {
+                      id: "foreignColumn",
+                      title: strings.LookupColumnForeignTitle,
+                      type: CustomCollectionFieldType.string,
+                      required: true
+                    }
+                  ],
+                  disabled: false
+                })
+              ]
+            },
+            {
+              groupName: strings.TemplateGroupName,
+              groupFields: [
                 PropertyPaneChoiceGroup('selectedTemplateLayout', {
                   label: strings.LayoutTemplateLabel,
 
@@ -236,8 +269,7 @@ export default class DisplayPagePropertyWebPart extends BaseClientSideWebPart<ID
 
                 })
               ]
-            },
-
+            }
           ]
         }
       ]

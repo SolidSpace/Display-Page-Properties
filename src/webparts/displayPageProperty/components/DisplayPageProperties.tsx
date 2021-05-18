@@ -10,6 +10,8 @@ import * as strings from 'DisplayPagePropertyWebPartStrings';
 import { Placeholder }from "@pnp/spfx-controls-react/lib/Placeholder";
 import { Spinner } from 'office-ui-fabric-react/lib/Spinner';
 import * as moment from 'moment';
+import { ISelectableLookup } from '../../common/dataContracts/ISelectableLookup';
+import { LookupHelper } from '../../common/util/LookupHelper';
 
 
 export class DisplayPageProperties extends React.Component<IDisplayPagePropertiesProps, IDisplayPagePropertiesState> {
@@ -43,8 +45,8 @@ export class DisplayPageProperties extends React.Component<IDisplayPagePropertie
 
 
   private async _queryTemplateContent():Promise<any>{
-    //let items = await this.PropertyService.getPageProperties(this.props.context,this.props.skipSystemFields);
-    this.PropertyService.getExpandedPagePropertyValues(this.props.context,this.props.selectedProperties).then((items)=>{
+    let selectableLookup:ISelectableLookup = LookupHelper.getSelectableLookup(this.props.selectedLookupProperties);
+    this.PropertyService.getExpandedPagePropertyValues(this.props.context,this.props.selectedProperties,selectableLookup).then((items)=>{
       let normalizedItems = PagePropertyService.getNormalizedQueryResults(items,this.props.selectedProperties);
       this.templateContext = {items:normalizedItems};
       (this.configSet)?this._renderTemplate():true;
