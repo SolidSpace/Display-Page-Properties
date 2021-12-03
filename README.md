@@ -1,9 +1,10 @@
 # sp-page-properties
 
-## Summary
+## What is the purpose of the Webpart?
+Adding SharePoint columns to the SitePages Library is a common way to set up filter and searchable Content Sites with Modern Search Webparts. 
+This "Page Property" Webpart allows you to render those additional columns within your Page and put them in shape by setting up an awesome handlebars template.
 
-SPFX Webpart Project for SharePoint online. 
-Use this Webpart to display Page Properties inside your Site Page and style them by using Handlebars Template. 
+
 This Webpart is build for SharePoint Online with spfx version 1.11.
 
 ![Web Part Preview](https://raw.githubusercontent.com/SolidSpace/Display-Page-Properties/main/assets/display-page-properties-webpart.GIF)
